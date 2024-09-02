@@ -1,0 +1,151 @@
+---
+title: "mappedreadalignmentR_vignette"
+author: "Teodor Devda"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{mappedreadalignmentR_vignette}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE,comment = "#>")
+```
+
+This package allow the user to visualize the alignment of individual  
+reads, extracted from a BAM file, against a reference genome.
+
+The alignment is constructed based on the operations specified in the CIGAR 
+string of the BAM file, from which the individual read is extracted 
+using a specific function. 
+
+## <u>CIGAR string </u>
+
+The CIGAR string is one the entries of the BAM file and it is a compact 
+representation of an alignment that describes how the read aligns 
+to the reference genome.
+
+### CIGAR Operations 
+
+Below are the operations that can be found in a CIGAR string:
+
+| **Operation**    | **Symbol** | **Description**                            |
+|------------------|------------|--------------------------------------------|
+| **Match**        | M          | Alignment match                            |
+|                  |            | (can be a sequence match or mismatch).     |
+| **Insertion**    | I          | Insertion to the reference.                |
+| **Deletion**     | D          | Deletion from the reference.               |
+| **Skipped**      | N          | Skipped region from the reference,         |
+|                  |            | commonly found in splicing alignments.     |
+| **Soft Clip**    | S          | Soft clipping                              |
+|                  |            | (clipped sequences present in the read).   |
+| **Hard Clip**    | H          | Hard clipping                              |
+|                  |            |(clipped sequences not present in the read).|
+| **Padding**      | P          | Padding                                    |
+|                  |            | (silent deletion from padded reference)    |
+| **Sequence Match** | =        | Exact sequence match.                      |
+| **Sequence Mismatch** | X     | Sequence mismatch.                         |
+
+### Example
+
+CIGAR: 2S5M2D4M
+Ref.:   AGATCGAGACC
+Read: AAAGATC--GACC
+
+* **2S**: The first two bases of the read are soft-clipped (`AA`), 
+meaning they are not aligned to the reference but are present in the read.
+* **5M**: The next five bases (`GATCG`) align perfectly with the reference.
+* **2D**: Two bases (`GA`) are deleted from the reference, which means they 
+are present in the reference but absent in the read.
+* **4M**: The final four bases (`GACC`) align perfectly with the reference.
+
+```{r setup}
+library(mappedreadalignment)
+```
+
+## <u>Read extraction  </u>
+
+Using the ***specific_read*** function an individual read can be extracted 
+from a BAM file. The function requires the following parameters: 
+
+* ***input =*** path to the input BAM file
+
+* ***input =*** the ID of the read to extract
+
+* ***output =*** a list containing the specific info of the read
+
+```{r, eval = FALSE}
+read4 <- specific_read(file_bam, specific_read_id)
+```
+
+The object read4 created in this way is a list containing the id, 
+chromosome, sequence, CIGAR and the position of the specific read.
+
+## <u>Read alignment </u>
+
+Using the ***alignment_to_ref*** function the alignment is performed. If 
+no reference genome is given in input, a UCSC hg38 reference genome is used.
+The function requires different parameters: 
+
+* ***input =*** a specific read extracted from a BAM file
+
+* ***input =*** an optional reference genome given in input by the user
+
+* ***output =*** a list object reporting the read ID, CIGAR string and 
+a sub-list containing the alignment of the query read to the reference 
+genome.
+
+```{r}
+read4 <- list(rname = "chr6",
+    pos = 32401000, cigar = "2S5M2D4M", 
+    seq = "AAAGATCGACC", qname = "read4")
+result <- alignment_to_ref(read4)
+```
+
+**NOTE:** In this example, an artificial read ('read4') is used for 
+demonstration purposes.
+
+
+The idea behind this function is that at each CIGAR operation the alignment 
+is performed based on what is the specific operation, starting from the 
+position indicated in the BAM file (the position at which the alignment 
+starts). 
+
+The operations are treated in the following way: 
+
+* *Match* (**M**), *sequence mismatch* (**X**), *sequence match* (**=**):
+the bases of the query read and reference genome are simply aligned
+
+* *Deletion* (**D**) : a '**-**' is inserted in the the query read to align
+with the extra base in the reference genome
+
+* *Insertion* (**I**) : a '**-**' is inserted in the reference genome to 
+align with the extra base in the query read
+
+* *Soft clipping* (**S**): the clipped bases are included in the query read
+but are not aligned to the reference
+
+* *Hard clipping* (**H**): bases are completely removed from the read and 
+are not shown in the alignment
+
+* *Skipped region* (**N**): a '_' is inserted in the query read
+
+* *Padding* (**P**): '*' is inserted in both the query read and 
+reference genome.
+
+Inside the function, the CIGAR string is transformed into a character vector
+using the function **cigar_transform**. The **alignment_to_ref function** 
+then iterates through this transformed CIGAR string, performing the
+appropriate operation for each segment to construct the final alignment. 
+
+```{r}
+sessionInfo()
+```
+
+
+
+
+
+
+

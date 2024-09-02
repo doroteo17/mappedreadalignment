@@ -12,25 +12,28 @@ alignment_to_ref(read, genome = NULL)
 \item{genome}{An optional reference genome given in input by the user.}
 }
 \value{
-The function return a list object reporting the read ID, CIGAR string
-and the alignment of the query read to the reference genome.
+The function return a list object reporting the read ID, CIGAR
+string and the alignment of the query read to the reference genome.
 }
 \description{
 This function takes as input a specific read extracted from a BAM file and
 a reference genome, if no reference genome is given in input,
 a UCSC hg38 reference genome is used, and return the alignment of the read
 to the reference genome, using the CIGAR of the specific read.
+Padding (P) is represented as "*", skipped region from the reference (N)
+are represented as "_" and deletion (D) and insertion(I) are represented
+as "-".
 All the mapped reads, including those that have been mapped to the
 reverse strand,in the BAM file are represented on the forward
 genomic strand and also CIGAR string is reversed and thus recorded
-consistently with the sequence bases as represented. Taking this into
-consideration the alignment of a query read, that have been mapped to the
-reverse strand, to the genome is also done on the forward genomic strand.
+consistently with the sequence bases as represented.
+Taking this into consideration the alignment of a query read,
+that have been mapped to the reverse strand, to the genome is also done
+on the forward genomic strand.
 }
 \examples{
 example_read <- list(rname = "chr6",
-pos = 32402000,
-strand = "+",
+pos = 32401000,
 cigar = "2S5M2D4M",
 seq = "AAAGATCGACC",
 qname = "read4")

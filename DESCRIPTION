@@ -1,14 +1,35 @@
-Package: mappedreaalignment
-Title: What the Package Does (One Line, Title Case)
-Version: 0.1.0
-Authors@R: 
-    person("Teodor", "Devda","teodordevda@yahoo.com", role = c("aut", "cre")
-Description: What the package does (one paragraph).
+Package: mappedreadalignment
+Type: Package
+Title: Show the Alignment of a Mapped Read, Extracted from a BAM File
+Depends: R (>= 4.4.0)
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
 Imports:
     Biostrings,
     BSgenome.Hsapiens.UCSC.hg38,
     Rsamtools
-License: GPL-3
+Version: 0.1.0
+Date: 2024-08-28
 Encoding: UTF-8
+Authors@R: 
+    person("Teodor", "Devda", email = "teodordevda@yahoo.com", 
+    role = c("aut", "cre"), 
+    comment = c(ORCID = "0009-0008-0836-2811"))
+Description: The specific_read function extracts a specific 
+    read entry from the input BAM file. The cigar_transform 
+    function transforms the CIGAR string to be used in the main
+    function, alignment_to_ref. Based on the position of the
+    alignment to the reference genome and the operations in the
+    CIGAR string of the read extracted from the BAM file, the
+    alignment_to_ref function shows the alignment of the read 
+    to the reference genome.
+License: GPL-3
+URL: https://github.com/doroteo17/mappedreadalignment
+BugReports: https://github.com/doroteo17/mappedreadalignment/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+biocViews: Alignment, Sequencing, DNASeq, RNASeq
+Config/testthat/edition: 3
+VignetteBuilder: knitr

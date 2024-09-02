@@ -4,23 +4,27 @@
 #' a reference genome, if no reference genome is given in input,
 #' a UCSC hg38 reference genome is used, and return the alignment of the read
 #' to the reference genome, using the CIGAR of the specific read.
+#' Padding (P) is represented as "*", skipped region from the reference (N)
+#' are represented as "_" and deletion (D) and insertion(I) are represented
+#' as "-".
 #' All the mapped reads, including those that have been mapped to the
 #' reverse strand,in the BAM file are represented on the forward
 #' genomic strand and also CIGAR string is reversed and thus recorded
-#' consistently with the sequence bases as represented. Taking this into
-#' consideration the alignment of a query read, that have been mapped to the
-#' reverse strand, to the genome is also done on the forward genomic strand.
+#' consistently with the sequence bases as represented.
+#' Taking this into consideration the alignment of a query read,
+#' that have been mapped to the reverse strand, to the genome is also done
+#' on the forward genomic strand.
+#'
 #'
 #' @param read A specific read extracted from a BAM file.
 #' @param genome An optional reference genome given in input by the user.
-#' @return The function return a list object reporting the read ID, CIGAR string
-#' and the alignment of the query read to the reference genome.
+#' @return The function return a list object reporting the read ID, CIGAR
+#' string and the alignment of the query read to the reference genome.
 #' @importFrom Biostrings readDNAStringSet subseq
 #' @import BSgenome.Hsapiens.UCSC.hg38
 #' @examples
 #' example_read <- list(rname = "chr6",
-#' pos = 32402000,
-#' strand = "+",
+#' pos = 32401000,
 #' cigar = "2S5M2D4M",
 #' seq = "AAAGATCGACC",
 #' qname = "read4")
@@ -39,55 +43,50 @@
 #' # [1] "AAAGATC--GACC"
 #' @export
 alignment_to_ref <- function(read, genome = NULL) {
-  if (is.null(genome)) {
-    if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg38", quietly = TRUE))
-      stop("The package 'BSgenome.Hsapiens.UCSC.hg38' is required but is not installed.")
-    genome <- BSgenome.Hsapiens.UCSC.hg38::Hsapiens }
-  else {
-    genome <- Biostrings::readDNAStringSet(genome, format = "fasta")}
-  chr <- as.character(read$rname)
-  cigar <- cigar_transform(read$cigar)
-  pos <- read$pos
-  seq <- as.character(read$seq)
-  read_pos <- 1
-  ref_read <- c()
-  query_read <- c()
-  genome <- genome[[chr]]
-  for (operation in cigar) {
-    if (operation == "M" || operation == "=" || operation == "X") {
-      if (read_pos <= nchar(seq)) {
-        ref_read <- c(ref_read, as.character(subseq(genome, start = pos,width = 1)))
-        query_read <- c(query_read, substr(seq, read_pos,read_pos))
-        read_pos <- read_pos + 1
-        pos <- pos + 1 }
-    } else if (operation == "I") {
-      if (read_pos <= nchar(seq)) {
-        ref_read <- c(ref_read, "-")
-        query_read <- c(query_read, substr(seq, read_pos,read_pos))
-        read_pos <- read_pos + 1 }
-    } else if (operation == "D") {
-      ref_read <- c(ref_read, as.character(subseq(genome, start = pos,width = 1)))
-      query_read <- c(query_read, "-")
-      pos <- pos + 1
-    } else if (operation == "S") {
-      query_read <- c(query_read, substr(seq, read_pos,read_pos))
-      ref_read <- c(" ", ref_read)
-      read_pos <- read_pos + 1
-    } else if (operation == "N") {
-      ref_read <- c(ref_read, as.character(subseq(genome, start = pos,width = 1)))
-      query_read <- c(query_read, "_")
-      pos <- pos + 1
-    } else if (operation == "P") {
-      ref_read <- c(ref_read, "*")
-      query_read <- c(query_read, "*")
-    }
-  }
-  ref_read <- paste(ref_read, collapse = "")
-  query_read <- paste(query_read, collapse = "")
-  result <- list(
-    Read_ID = read$qname,
-    CIGAR = read$cigar,
-    Alignment = list(Reference_genome = ref_read,
-                     Query_read = query_read))
-  return(result)
-}
+    if (is.null(genome)) {
+        if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg38", quietly = TRUE))
+            stop("The package 'BSgenome.Hsapiens.UCSC.hg38'is required but is
+                not installed.")
+        genome <- BSgenome.Hsapiens.UCSC.hg38::Hsapiens }
+    else {
+        genome <- Biostrings::readDNAStringSet(genome, format = "fasta")}
+    chr <- as.character(read$rname); cigar <- cigar_transform(read$cigar)
+    pos <- read$pos; seq <- as.character(read$seq)
+    ref_read <- query_read <- c(); read_pos <- 1
+    genome <- genome[[chr]]
+    for (operation in cigar) {
+        if (operation == "M" || operation == "=" || operation == "X") {
+            if (read_pos <= nchar(seq)) {
+                ref_read <- c(ref_read,as.character(subseq(genome,
+                    start=pos,width=1)))
+                query_read <- c(query_read, substr(seq, read_pos,read_pos))
+                read_pos <- read_pos + 1
+                pos <- pos + 1 }}
+        else if (operation == "I") {
+            if (read_pos <= nchar(seq)) {
+                ref_read <- c(ref_read, "-")
+                query_read <- c(query_read, substr(seq, read_pos,read_pos))
+                read_pos <- read_pos + 1 }}
+        else if (operation == "D") {
+            ref_read <- c(ref_read,as.character(subseq(genome,
+                start=pos,width=1)))
+            query_read <- c(query_read, "-")
+            pos <- pos + 1}
+        else if (operation == "S") {
+            query_read <- c(query_read, substr(seq, read_pos,read_pos))
+            ref_read <- c(" ", ref_read)
+            read_pos <- read_pos + 1}
+        else if (operation == "N") {
+            ref_read <- c(ref_read,as.character(subseq(genome,
+                start=pos,width=1)))
+            query_read <- c(query_read, "_")
+            pos <- pos + 1}
+        else if (operation == "P") {
+            ref_read <- c(ref_read, "*")
+            query_read <- c(query_read, "*")}
+        else if (operation == "H") {}}
+    ref_read <- paste(ref_read, collapse = "")
+    query_read <- paste(query_read, collapse = "")
+    result <- list(Read_ID = read$qname,CIGAR = read$cigar,
+        Alignment = list(Reference_genome = ref_read,Query_read = query_read))
+    return(result)}

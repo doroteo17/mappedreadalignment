@@ -16,6 +16,26 @@ A list containing the specific info of the read.
 }
 \description{
 This function takes a BAM file and the specific read ID as input and
-return a list with the id, chromosome, sequence, CIGAR, position and
-strand of the specific read.
+return a list with the id, chromosome, sequence, CIGAR and
+the position of the specific read. If the input file is not a BAM file,
+or the specific read id is not found, an error is raised.
+}
+\examples{
+specific_read(system.file("extdata", "example.bam",
+package = "mappedreadalignment"), "read4")
+# Returns: $qname
+# [1] "read4"
+#
+# $rname
+# [1] "chr6"
+#
+# $seq
+# 11-letter DNAString object
+# seq: AAAGATCGACC
+#
+# $cigar
+# [1] "2S5M2D4M"
+#
+# $pos
+# [1] 32401000
 }

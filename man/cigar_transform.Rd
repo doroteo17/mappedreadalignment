@@ -16,7 +16,8 @@ operation from the CIGAR string.
 \description{
 This function takes a CIGAR string as input and transforms
 it into a character vector
-by expanding each operation symbol according to the number of times it occurs.
+by expanding each operation symbol according to the number of times
+it occurs.
 }
 \examples{
 cigar_transform("2M1I3M1D")
