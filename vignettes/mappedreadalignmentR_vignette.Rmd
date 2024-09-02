@@ -13,7 +13,7 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE,comment = "#>")
 ```
 
-This package allow the user to visualize the alignment of individual  
+This package allows the user to visualize the alignment of individual  
 reads, extracted from a BAM file, against a reference genome.
 
 The alignment is constructed based on the operations specified in the CIGAR 
@@ -135,7 +135,7 @@ are not shown in the alignment
 reference genome.
 
 Inside the function, the CIGAR string is transformed into a character vector
-using the function **cigar_transform**. The **alignment_to_ref function** 
+using the function **cigar_transform**. The **alignment_to_ref** function 
 then iterates through this transformed CIGAR string, performing the
 appropriate operation for each segment to construct the final alignment. 
 
